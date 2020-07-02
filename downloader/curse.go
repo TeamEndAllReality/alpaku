@@ -2,20 +2,23 @@ package downloader
 
 import (
 	"strconv"
+	"sync"
 
+	"github.com/TeamEndAllReality/alpaku/global"
 	"github.com/TeamEndAllReality/cav2"
 )
 
 func init() {
-	proced = make(map[int]bool)
+	proced = &sync.Map{}
 }
 
 var (
-	proced map[int]bool
+	proced *sync.Map
 )
 
 //DownloadCurseFile Downloads a file off of curseforge
 func DownloadCurseFile(addn *cav2.File, name string) {
+	defer global.WG.Done()
 	h, _ := cav2.GetFileHash("mods/" + name + ".jar")
 	if int64(h) != addn.PackageFingerprint {
 		println("Downloading: " + name)
@@ -29,18 +32,24 @@ func DownloadCurseFile(addn *cav2.File, name string) {
 
 //ProcCurseAddon Queues a file for downloading with dependencies from curse
 func ProcCurseAddon(addn *cav2.Addon, gv string) {
-	if _, ok := proced[addn.ID]; !ok {
-		proced[addn.ID] = true
+	defer global.WG.Done()
+	if _, ok := proced.LoadOrStore(addn.ID, true); !ok {
 		for _, adl := range addn.GameVersionLatestFiles {
 			if adl.GameVersion == gv {
 				url, _ := cav2.GetAddonFile(addn.ID, adl.ProjectFileID)
-				for _, depend := range url.Dependencies {
-					if depend.Type == 1 {
-						dep, _ := cav2.GetAddon(strconv.Itoa(depend.AddonID))
-						ProcCurseAddon(dep, gv)
+				global.WG.Add(1)
+				go func() {
+					defer global.WG.Done()
+					for _, depend := range url.Dependencies {
+						if depend.Type == 1 {
+							dep, _ := cav2.GetAddon(strconv.Itoa(depend.AddonID))
+							global.WG.Add(1)
+							go ProcCurseAddon(dep, gv)
+						}
 					}
-				}
-				DownloadCurseFile(url, addn.Name)
+				}()
+				global.WG.Add(1)
+				go DownloadCurseFile(url, addn.Name)
 				break
 			}
 		}

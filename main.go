@@ -1,8 +1,9 @@
 package main
 
 import (
+	"github.com/TeamEndAllReality/alpaku/downloader"
+	"github.com/TeamEndAllReality/alpaku/global"
 	"github.com/TeamEndAllReality/cav2"
-	"github.com/TeamEndAllReality/mcpaku/downloader"
 )
 
 const (
@@ -12,8 +13,11 @@ const (
 func main() {
 	cd := GetConfig(conf)
 	data := GetDownloads(cd)
-	addns, _ := cav2.GetAddons(data.Mods)
+
+	addns, _ := cav2.GetAddons(data.Mods.GetRelevent(cd.Sided))
 	for _, addn := range addns {
-		downloader.ProcCurseAddon(addn, data.GameVersion)
+		global.WG.Add(1)
+		go downloader.ProcCurseAddon(addn, cd.GameVersion)
 	}
+	global.WG.Wait()
 }
