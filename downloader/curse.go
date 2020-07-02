@@ -27,6 +27,7 @@ func DownloadCurseFile(addn *cav2.File, name string) {
 	sane = strings.ReplaceAll(sane, ")", "")
 	sane = strings.ReplaceAll(sane, "[", "")
 	sane = strings.ReplaceAll(sane, "]", "")
+	sane = strings.ReplaceAll(sane, "'", "")
 	defer global.WG.Done()
 	h, _ := cav2.GetFileHash("mods/" + sane + ".jar")
 	if int64(h) != addn.PackageFingerprint {
