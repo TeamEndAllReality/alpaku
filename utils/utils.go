@@ -14,5 +14,6 @@ func Sanitize(name string) string {
 	sane = strings.ReplaceAll(sane, "]", "")
 	sane = strings.ReplaceAll(sane, "'", "")
 	sane = strings.ReplaceAll(sane, ",", "")
+	sane = strings.ReplaceAll(sane, "/", "")
 	return sane
 }
