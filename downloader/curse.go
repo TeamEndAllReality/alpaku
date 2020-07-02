@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/TeamEndAllReality/alpaku/global"
@@ -18,15 +19,23 @@ var (
 
 //DownloadCurseFile Downloads a file off of curseforge
 func DownloadCurseFile(addn *cav2.File, name string) {
+	sane := strings.ReplaceAll(name, ":", "")
+	sane = strings.ReplaceAll(sane, " ", "")
+	sane = strings.ReplaceAll(sane, "-", "")
+	sane = strings.ReplaceAll(sane, "!", "")
+	sane = strings.ReplaceAll(sane, "(", "")
+	sane = strings.ReplaceAll(sane, ")", "")
+	sane = strings.ReplaceAll(sane, "[", "")
+	sane = strings.ReplaceAll(sane, "]", "")
 	defer global.WG.Done()
-	h, _ := cav2.GetFileHash("mods/" + name + ".jar")
+	h, _ := cav2.GetFileHash("mods/" + sane + ".jar")
 	if int64(h) != addn.PackageFingerprint {
-		println("Downloading: " + name)
+		println("Downloading: " + sane)
 		inf, _ := cav2.DoHTTPRequest(addn.DownloadURL)
-		cav2.WriteBytesToFile(cav2.ResponseToBytes(inf), "mods/"+name+".jar")
-		println("Downloaded: " + name)
+		cav2.WriteBytesToFile(cav2.ResponseToBytes(inf), "mods/"+sane+".jar")
+		println("Downloaded: " + sane)
 	} else {
-		println("Hash Matched (Not Downloading): " + name)
+		println("Hash Matched (Not Downloading): " + sane)
 	}
 }
 
