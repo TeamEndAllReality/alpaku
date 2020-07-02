@@ -41,7 +41,7 @@ func ProcCurseAddon(addn *cav2.Addon, gv string) {
 				go func() {
 					defer global.WG.Done()
 					for _, depend := range url.Dependencies {
-						if depend.Type == 1 {
+						if depend.Type == 3 {
 							dep, _ := cav2.GetAddon(strconv.Itoa(depend.AddonID))
 							global.WG.Add(1)
 							go ProcCurseAddon(dep, gv)
