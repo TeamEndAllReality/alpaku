@@ -33,13 +33,13 @@ func DownloadCurseFile(addn *cav2.File, name string) {
 }
 
 //ProcCurseAddon Queues a file for downloading with dependencies from curse
-func ProcCurseAddon(addn *cav2.Addon, gv string, ml string) {
+func ProcCurseAddon(addn *cav2.Addon, gv string /*, ml string*/) {
 	defer global.WG.Done()
 	if _, ok := proced.LoadOrStore(addn.ID, true); !ok {
 		for _, adl := range addn.GameVersionLatestFiles {
 			if adl.GameVersion == gv {
 				url, _ := cav2.GetAddonFile(addn.ID, adl.ProjectFileID)
-				if utils.Contains(url.GameVersion, ml) {
+				if utils.Contains(url.GameVersion, gv) {
 					global.WG.Add(1)
 					go func() {
 						defer global.WG.Done()
@@ -47,7 +47,7 @@ func ProcCurseAddon(addn *cav2.Addon, gv string, ml string) {
 							if depend.Type == 3 {
 								dep, _ := cav2.GetAddon(strconv.Itoa(depend.AddonID))
 								global.WG.Add(1)
-								go ProcCurseAddon(dep, gv, ml)
+								go ProcCurseAddon(dep, gv /*, ml*/)
 							}
 						}
 					}()
