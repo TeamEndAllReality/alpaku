@@ -1,4 +1,4 @@
-package main
+package data
 
 import (
 	"encoding/json"
@@ -22,6 +22,7 @@ const (
 //RemoteConfig Represents a remote Repo config
 type RemoteConfig struct {
 	GameVersion string
+	Modloader   string
 	URL         string
 	Sided       Side
 }
