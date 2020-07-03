@@ -39,7 +39,7 @@ func ProcCurseAddon(addn *cav2.Addon, gv string, ml string) {
 		for _, adl := range addn.GameVersionLatestFiles {
 			if adl.GameVersion == gv {
 				url, _ := cav2.GetAddonFile(addn.ID, adl.ProjectFileID)
-				if url.GameVersion[0] == ml {
+				if utils.Contains(url.GameVersion, ml) {
 					global.WG.Add(1)
 					go func() {
 						defer global.WG.Done()
